@@ -4,145 +4,372 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Südgrat – Zeiterfassung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-  /* ---- Südgrat Zeiterfassung – scoped unter .sg-app ---- */
+  /* ---- Südgrat Zeiterfassung – Design System v2 ---- */
   .sg-app *{box-sizing:border-box;margin:0;padding:0}
   .sg-app{
-    --spruce:#1F3D33; --spruce-2:#2A4F42; --stone:#3A4A47;
-    --mist:#F2F0EA; --mist-2:#E7E3D8; --card:#FFFFFF;
-    --amber:#E8843C; --amber-d:#C96B28;
-    --red:#C5453B; --red-bg:#F8E7E4;
-    --teal:#2F8F6F; --teal-bg:#E2F0EA;
-    --ink:#1B221F; --muted:#727C77; --line:#E2DED3;
-    --mono:"SFMono-Regular",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
-    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    font-family:var(--sans); color:var(--ink);
-    display:flex; align-items:flex-start; justify-content:center;
-    gap:28px; flex-wrap:wrap;
-    padding:28px 16px; background:var(--mist);
-    min-height:100%;
+    /* === Farb-Tokens (aus Claude Design System) === */
+    --color-primary:       #263B28;   /* Tannengrün */
+    --color-primary-hover: #1D2E1F;
+    --color-primary-press: #162219;
+    --color-secondary:     #4E6B4A;   /* Almwiese */
+    --color-neutral:       #4A5450;   /* Schiefer */
+    --color-neutral-light: #9AADA8;   /* Nebel */
+    --color-accent:        #6B4E9A;   /* Lavendel */
+    --color-accent-light:  #C4B0E8;   /* Morgenviolett */
+    --color-bg:            #F0EEE8;   /* Edelweiß */
+    --color-surface:       #F7F6F1;   /* etwas heller als bg, für Cards */
+    --color-topo:          #7EC49A;   /* Topo-Mint */
+    --color-ink:           #1E2620;   /* near-black */
+    --color-border:        #D8D4C8;   /* warm stone hairline */
+    --color-muted:         #7A8884;   /* Schiefer aufgehellt */
+
+    /* Semantische Aliases */
+    --color-error:         #B03A2E;
+    --color-error-bg:      #F5E8E6;
+    --color-success:       #4E6B4A;   /* Almwiese als Erfolgsfarbe */
+    --color-success-bg:    #E4EDE3;
+    --color-info-bg:       #ECEAE4;
+
+    /* === Typografie === */
+    --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+    --font-body:    'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --font-mono:    'Spline Sans Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+    /* === Radien (soft-but-sturdy) === */
+    --radius-sm:   8px;
+    --radius-md:   12px;
+    --radius-lg:   20px;
+    --radius-xl:   28px;
+    --radius-pill: 999px;
+
+    /* === Schatten (warm, niedrig) === */
+    --shadow-sm:    0 2px 8px -2px rgba(30,38,32,.12), 0 1px 0 rgba(30,38,32,.04);
+    --shadow-md:    0 8px 24px -8px rgba(30,38,32,.18), 0 2px 0 rgba(30,38,32,.04);
+    --shadow-lg:    0 20px 48px -16px rgba(30,38,32,.28);
+    --shadow-focus: 0 0 0 3px rgba(107,78,154,.35);   /* Lavendel-Ring */
+    --shadow-inset: inset 0 1px 3px rgba(30,38,32,.14);
+
+    /* === Motion === */
+    --dur-base:  200ms;
+    --ease-out:  cubic-bezier(0.22, 1, 0.36, 1);
+
+    font-family: var(--font-body);
+    color: var(--color-ink);
+    display: flex; align-items: flex-start; justify-content: center;
+    gap: 28px; flex-wrap: wrap;
+    padding: 28px 16px;
+    background: var(--color-bg);
+    min-height: 100%;
   }
 
   /* ---- Telefon-Rahmen ---- */
   .sg-phone{
-    width:360px; max-width:100%; background:var(--card);
-    border-radius:30px; overflow:hidden;
-    box-shadow:0 24px 60px -22px rgba(31,61,51,.55), 0 2px 0 rgba(0,0,0,.04);
-    border:1px solid var(--line);
+    width:360px; max-width:100%;
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--color-border);
   }
+
+  /* Topografische Kontur-Textur im Header */
   .sg-top{
-    background:var(--spruce); color:#EAF1ED; padding:18px 20px 16px;
-    position:relative;
+    background: var(--color-primary);
+    color: #D8E8DA;
+    padding: 18px 20px 16px;
+    position: relative;
+    overflow: hidden;
   }
-  .sg-brandrow{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px}
-  .sg-brand{display:flex; align-items:center; gap:9px; font-weight:700; letter-spacing:.02em; font-size:15px}
+  .sg-top::before{
+    content:'';
+    position:absolute; inset:0;
+    background-image:
+      repeating-linear-gradient(
+        120deg,
+        transparent,
+        transparent 18px,
+        rgba(126,196,154,.08) 18px,
+        rgba(126,196,154,.08) 19px
+      );
+    pointer-events:none;
+  }
+
+  .sg-brandrow{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; position:relative}
+  .sg-brand{
+    display:flex; align-items:center; gap:9px;
+    font-family: var(--font-display);
+    font-weight:700; letter-spacing:.01em; font-size:15px;
+  }
   .sg-ridge{width:22px; height:14px}
   .sg-badge{
-    font-size:11px; font-weight:600; letter-spacing:.04em;
-    background:rgba(232,132,60,.18); color:#F4C49A;
-    border:1px solid rgba(232,132,60,.4); border-radius:999px; padding:3px 9px;
+    font-family: var(--font-body);
+    font-size:10.5px; font-weight:600; letter-spacing:.05em;
+    background: rgba(196,176,232,.15);
+    color: var(--color-accent-light);
+    border: 1px solid rgba(196,176,232,.3);
+    border-radius: var(--radius-pill);
+    padding: 3px 10px;
+    position:relative;
   }
-  .sg-date{font-size:12.5px; color:#9DB6AC; letter-spacing:.03em}
+  .sg-date{font-size:12px; color:rgba(216,232,218,.6); letter-spacing:.02em; position:relative}
 
   /* ---- Status-Anzeige ---- */
   .sg-status{padding:20px 20px 6px; text-align:center}
-  .sg-state-label{font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600}
-  .sg-clock{font-family:var(--mono); font-size:42px; font-weight:600; letter-spacing:-.01em; color:var(--ink); line-height:1.1; margin:4px 0 2px}
-  .sg-sub{font-size:13px; color:var(--muted)}
-  .sg-sub b{font-family:var(--mono); color:var(--spruce-2); font-weight:600}
+  .sg-state-label{
+    font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--color-muted); font-weight:600; font-family:var(--font-body);
+  }
+  .sg-clock{
+    font-family: var(--font-mono);
+    font-size:44px; font-weight:600; letter-spacing:-.02em;
+    color:var(--color-ink); line-height:1.1; margin:6px 0 3px;
+  }
+  .sg-sub{font-size:13px; color:var(--color-muted); font-family:var(--font-body)}
+  .sg-sub b{font-family:var(--font-mono); color:var(--color-secondary); font-weight:600}
 
-  /* ---- Tages-Balken (Signature: Feierabend rutscht) ---- */
+  /* ---- Tages-Balken ---- */
   .sg-bar-wrap{padding:14px 20px 4px}
-  .sg-bar-head{display:flex; justify-content:space-between; align-items:baseline; font-size:11.5px; color:var(--muted); margin-bottom:7px; letter-spacing:.02em}
-  .sg-bar-head .fa{font-family:var(--mono); color:var(--spruce); font-weight:700; font-size:13px}
-  .sg-track{position:relative; height:10px; background:var(--mist-2); border-radius:999px; overflow:visible}
-  .sg-fill{position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,var(--spruce),var(--spruce-2)); border-radius:999px; width:0%; transition:width .5s cubic-bezier(.34,1.2,.4,1)}
-  .sg-fa-marker{position:absolute; top:50%; transform:translate(-50%,-50%); width:16px; height:16px; border-radius:50%; background:var(--amber); border:3px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.25); left:0%; transition:left .5s cubic-bezier(.34,1.2,.4,1)}
-  .sg-shift{font-family:var(--mono); font-size:11px; color:var(--amber-d); font-weight:700; text-align:right; height:14px; margin-top:4px; opacity:0; transition:opacity .25s}
+  .sg-bar-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-size:11px; color:var(--color-muted); margin-bottom:8px; letter-spacing:.02em;
+  }
+  .sg-bar-head .fa{font-family:var(--font-mono); color:var(--color-primary); font-weight:600; font-size:12.5px}
+  .sg-track{
+    position:relative; height:8px;
+    background:var(--color-border);
+    border-radius:var(--radius-pill); overflow:visible;
+  }
+  .sg-fill{
+    position:absolute; left:0; top:0; bottom:0;
+    background:linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+    border-radius:var(--radius-pill); width:0%;
+    transition:width .5s var(--ease-out);
+  }
+  .sg-fa-marker{
+    position:absolute; top:50%; transform:translate(-50%,-50%);
+    width:16px; height:16px; border-radius:50%;
+    background:var(--color-accent);
+    border:3px solid var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    left:0%; transition:left .5s var(--ease-out);
+  }
+  .sg-shift{
+    font-family:var(--font-mono); font-size:11px;
+    color:var(--color-accent); font-weight:600;
+    text-align:right; height:14px; margin-top:5px; opacity:0;
+    transition:opacity var(--dur-base);
+  }
   .sg-shift.show{opacity:1}
 
   /* ---- Aktionen ---- */
-  .sg-actions{padding:8px 20px 4px; display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .sg-actions{padding:8px 20px 4px; display:grid; grid-template-columns:1fr 1fr; gap:8px}
   .sg-btn{
-    appearance:none; border:1px solid var(--line); background:#fff; color:var(--ink);
-    border-radius:14px; padding:13px 12px; font-size:13.5px; font-weight:600; font-family:var(--sans);
-    cursor:pointer; transition:transform .08s, box-shadow .15s, border-color .15s, background .15s;
-    display:flex; flex-direction:column; align-items:center; gap:5px; line-height:1.2; text-align:center;
+    appearance:none;
+    border:1px solid var(--color-border);
+    background:var(--color-surface);
+    color:var(--color-ink);
+    border-radius:var(--radius-md);
+    padding:13px 12px;
+    font-size:13px; font-weight:600; font-family:var(--font-body);
+    cursor:pointer;
+    transition:
+      transform var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base),
+      border-color var(--dur-base),
+      background var(--dur-base);
+    display:flex; flex-direction:column; align-items:center; gap:5px;
+    line-height:1.2; text-align:center;
+    box-shadow: var(--shadow-sm);
   }
   .sg-btn .ic{font-size:18px}
-  .sg-btn small{font-weight:500; color:var(--muted); font-size:10.5px}
-  .sg-btn:hover:not(:disabled){border-color:var(--spruce-2); box-shadow:0 4px 14px -8px rgba(31,61,51,.5)}
-  .sg-btn:active:not(:disabled){transform:translateY(1px)}
-  .sg-btn:focus-visible{outline:3px solid rgba(232,132,60,.5); outline-offset:2px}
-  .sg-btn.primary{grid-column:1/-1; background:var(--amber); border-color:var(--amber-d); color:#3a2410}
-  .sg-btn.primary:hover{box-shadow:0 6px 18px -8px rgba(232,132,60,.8)}
-  .sg-btn.danger-out{grid-column:1/-1}
-  .sg-btn:disabled{opacity:.42; cursor:not-allowed}
-
-  /* ---- Untere Leiste (Woche / Homeoffice / Nachtragen) ---- */
-  .sg-foot{padding:14px 20px 20px; margin-top:6px; border-top:1px solid var(--line)}
-  .sg-week{display:flex; gap:5px; margin-bottom:12px}
-  .sg-day{
-    flex:1; text-align:center; padding:7px 0 6px; border-radius:10px; font-size:11px; font-weight:600;
-    background:var(--mist); color:var(--stone); border:1px solid transparent; cursor:pointer; transition:.12s;
+  .sg-btn small{font-weight:500; color:var(--color-muted); font-size:10px}
+  .sg-btn:hover:not(:disabled){
+    border-color:var(--color-secondary);
+    background:#EDF0EC;
+    box-shadow:var(--shadow-md);
   }
-  .sg-day.today{background:var(--spruce); color:#fff}
-  .sg-day.locked{background:repeating-linear-gradient(45deg,#EFEBE0,#EFEBE0 4px,#E7E2D5 4px,#E7E2D5 8px); color:#A9A595; cursor:pointer}
-  .sg-day:hover{border-color:var(--spruce-2)}
-  .sg-day small{display:block; font-family:var(--mono); font-size:9px; opacity:.7; margin-top:1px}
+  .sg-btn:active:not(:disabled){
+    transform:translateY(1px);
+    box-shadow:var(--shadow-inset);
+  }
+  .sg-btn:focus-visible{outline:none; box-shadow:var(--shadow-focus)}
+  .sg-btn.primary{
+    grid-column:1/-1;
+    background:var(--color-primary);
+    border-color:var(--color-primary-hover);
+    color:#D8E8DA;
+    font-family:var(--font-display);
+    font-size:14px;
+    box-shadow:var(--shadow-md);
+  }
+  .sg-btn.primary:hover:not(:disabled){
+    background:var(--color-primary-hover);
+    box-shadow:0 8px 20px -6px rgba(38,59,40,.5);
+  }
+  .sg-btn.primary:active:not(:disabled){
+    background:var(--color-primary-press);
+    box-shadow:var(--shadow-inset);
+  }
+  .sg-btn.danger-out{grid-column:1/-1}
+  .sg-btn:disabled{opacity:.45; cursor:not-allowed; box-shadow:none}
+
+  /* ---- Woche + Chips ---- */
+  .sg-foot{padding:14px 20px 20px; margin-top:6px; border-top:1px solid var(--color-border)}
+  .sg-week{display:flex; gap:5px; margin-bottom:10px}
+  .sg-day{
+    flex:1; text-align:center; padding:7px 0 6px;
+    border-radius:var(--radius-sm);
+    font-size:11px; font-weight:600; font-family:var(--font-body);
+    background:var(--color-bg); color:var(--color-neutral);
+    border:1px solid transparent; cursor:pointer;
+    transition:border-color var(--dur-base), background var(--dur-base);
+  }
+  .sg-day.today{background:var(--color-primary); color:#D8E8DA}
+  .sg-day.locked{
+    background:repeating-linear-gradient(
+      45deg,#E9E6DE,#E9E6DE 4px,#E0DDD5 4px,#E0DDD5 8px
+    );
+    color:#ABA89E; cursor:pointer;
+  }
+  .sg-day:hover{border-color:var(--color-secondary)}
+  .sg-day small{display:block; font-family:var(--font-mono); font-size:9px; opacity:.65; margin-top:1px}
   .sg-mini{display:flex; gap:8px}
   .sg-chip{
     flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
-    font-size:12px; font-weight:600; color:var(--stone); background:var(--mist);
-    border:1px solid var(--line); border-radius:11px; padding:9px 8px; cursor:pointer; transition:.12s;
+    font-size:12px; font-weight:600; font-family:var(--font-body);
+    color:var(--color-neutral);
+    background:var(--color-bg);
+    border:1px solid var(--color-border);
+    border-radius:var(--radius-md);
+    padding:9px 8px; cursor:pointer;
+    transition:border-color var(--dur-base), background var(--dur-base);
+    box-shadow:var(--shadow-sm);
   }
-  .sg-chip:hover{border-color:var(--spruce-2)}
-  .sg-chip.locked{color:var(--muted)}
+  .sg-chip:hover{border-color:var(--color-secondary); background:#EDF0EC}
+  .sg-chip.locked{color:var(--color-muted)}
   .sg-chip .lk{font-size:13px}
 
-  /* ---- Toast / die App "antwortet" ---- */
+  /* ---- Toast ---- */
   .sg-toast{
-    margin:0 20px; border-radius:14px; padding:0; max-height:0; overflow:hidden;
-    transition:max-height .35s ease, margin .35s ease, padding .35s ease; opacity:0;
+    margin:0 20px; border-radius:var(--radius-md); padding:0;
+    max-height:0; overflow:hidden; opacity:0;
+    transition:max-height .35s var(--ease-out), opacity .2s, margin .3s, padding .3s;
+    border:1px solid transparent;
   }
-  .sg-toast.show{max-height:200px; opacity:1; padding:13px 15px; margin:0 20px 4px}
-  .sg-toast .tt{font-weight:700; font-size:13.5px; margin-bottom:3px; display:flex; align-items:center; gap:7px}
-  .sg-toast .tx{font-size:12.5px; line-height:1.45}
-  .sg-toast.ok{background:var(--teal-bg); color:#1c5a44}
-  .sg-toast.no{background:var(--red-bg); color:#8e2e26}
-  .sg-toast.info{background:#EDEFF0; color:var(--stone)}
+  .sg-toast.show{max-height:200px; opacity:1; padding:12px 14px; margin:0 20px 4px}
+  .sg-toast .tt{
+    font-family:var(--font-display);
+    font-weight:700; font-size:13px; margin-bottom:3px;
+    display:flex; align-items:center; gap:7px;
+  }
+  .sg-toast .tx{font-size:12px; line-height:1.5}
+  .sg-toast.ok{
+    background:var(--color-success-bg);
+    border-color:rgba(78,107,74,.2);
+    color:#2B4529;
+  }
+  .sg-toast.no{
+    background:var(--color-error-bg);
+    border-color:rgba(176,58,46,.2);
+    color:#7A2218;
+  }
+  .sg-toast.info{
+    background:var(--color-info-bg);
+    border-color:var(--color-border);
+    color:var(--color-neutral);
+  }
 
-  /* ---- Chooser (Pausenlänge) ---- */
-  .sg-chooser{margin:0 20px 6px; max-height:0; overflow:hidden; transition:max-height .3s ease, margin .3s}
+  /* ---- Chooser ---- */
+  .sg-chooser{margin:0 20px 6px; max-height:0; overflow:hidden; transition:max-height .3s var(--ease-out), margin .3s}
   .sg-chooser.show{max-height:140px; margin:6px 20px 10px}
-  .sg-chooser p{font-size:11.5px; color:var(--muted); margin-bottom:8px; font-weight:600; letter-spacing:.02em}
+  .sg-chooser p{
+    font-size:11px; color:var(--color-muted); margin-bottom:8px;
+    font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+  }
   .sg-opts{display:flex; gap:7px; flex-wrap:wrap}
   .sg-opt{
-    flex:1; min-width:60px; font-family:var(--mono); font-weight:600; font-size:13px;
-    padding:10px 4px; border-radius:11px; border:1px solid var(--line); background:#fff; cursor:pointer; transition:.12s;
+    flex:1; min-width:60px;
+    font-family:var(--font-mono); font-weight:600; font-size:13px;
+    padding:10px 4px;
+    border-radius:var(--radius-md);
+    border:1px solid var(--color-border);
+    background:var(--color-surface);
+    cursor:pointer;
+    transition:border-color var(--dur-base), background var(--dur-base), box-shadow var(--dur-base);
+    box-shadow:var(--shadow-sm);
   }
-  .sg-opt:hover{border-color:var(--amber-d); background:#FFF7F0}
-  .sg-opt:focus-visible{outline:3px solid rgba(232,132,60,.5); outline-offset:2px}
+  .sg-opt:hover{
+    border-color:var(--color-accent);
+    background:#EEE9F5;
+    box-shadow:var(--shadow-md);
+  }
+  .sg-opt:focus-visible{outline:none; box-shadow:var(--shadow-focus)}
 
-  /* ---- Fortschritt rechts ---- */
+  /* ---- Sidebar ---- */
   .sg-side{width:300px; max-width:100%}
-  .sg-side h2{font-size:15px; letter-spacing:.01em; margin-bottom:4px; color:var(--spruce)}
-  .sg-side .lead{font-size:12.5px; color:var(--muted); line-height:1.5; margin-bottom:16px}
+  .sg-side h2{
+    font-family:var(--font-display);
+    font-size:16px; font-weight:700; letter-spacing:.01em;
+    margin-bottom:5px; color:var(--color-primary);
+  }
+  .sg-side .lead{font-size:12.5px; color:var(--color-muted); line-height:1.55; margin-bottom:16px}
   .sg-prog{display:flex; align-items:center; gap:10px; margin-bottom:14px}
-  .sg-prog .ring{font-family:var(--mono); font-weight:700; font-size:15px; color:var(--spruce); background:#fff; border:2px solid var(--spruce); border-radius:999px; padding:5px 11px}
+  .sg-prog .ring{
+    font-family:var(--font-mono); font-weight:600; font-size:14px;
+    color:var(--color-primary);
+    background:var(--color-surface);
+    border:2px solid var(--color-primary);
+    border-radius:var(--radius-pill);
+    padding:5px 12px;
+    box-shadow:var(--shadow-sm);
+  }
   .sg-rules{list-style:none; display:flex; flex-direction:column; gap:7px}
   .sg-rule{
-    display:flex; gap:9px; align-items:flex-start; font-size:12.5px; line-height:1.4;
-    background:#fff; border:1px solid var(--line); border-radius:11px; padding:9px 11px; color:var(--muted);
-    transition:.25s;
+    display:flex; gap:9px; align-items:flex-start;
+    font-size:12px; line-height:1.45; font-family:var(--font-body);
+    background:var(--color-surface);
+    border:1px solid var(--color-border);
+    border-radius:var(--radius-md);
+    padding:9px 11px; color:var(--color-muted);
+    transition:border-color var(--dur-base), color var(--dur-base);
+    box-shadow:var(--shadow-sm);
   }
-  .sg-rule .mk{flex:none; width:18px; height:18px; border-radius:50%; border:2px solid var(--mist-2); display:flex; align-items:center; justify-content:center; font-size:11px; color:transparent; margin-top:1px}
-  .sg-rule.done{color:var(--ink); border-color:var(--teal)}
-  .sg-rule.done .mk{background:var(--teal); border-color:var(--teal); color:#fff}
-  .sg-done-msg{margin-top:14px; background:var(--spruce); color:#EAF1ED; border-radius:14px; padding:14px 16px; font-size:13px; line-height:1.5; display:none}
-  .sg-done-msg.show{display:block; animation:pop .4s ease}
+  .sg-rule .mk{
+    flex:none; width:18px; height:18px; border-radius:50%;
+    border:2px solid var(--color-border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; color:transparent; margin-top:1px;
+    transition:background var(--dur-base), border-color var(--dur-base), color var(--dur-base);
+  }
+  .sg-rule.done{color:var(--color-ink); border-color:var(--color-secondary)}
+  .sg-rule.done .mk{
+    background:var(--color-secondary);
+    border-color:var(--color-secondary);
+    color:#fff;
+  }
+  .sg-done-msg{
+    margin-top:14px;
+    background:var(--color-primary);
+    color:#D8E8DA;
+    border-radius:var(--radius-lg);
+    padding:14px 16px;
+    font-size:13px; line-height:1.55;
+    font-family:var(--font-body);
+    display:none;
+    box-shadow:var(--shadow-md);
+  }
+  .sg-done-msg.show{display:block; animation:pop .4s var(--ease-out)}
   @keyframes pop{from{transform:scale(.96); opacity:0}to{transform:scale(1); opacity:1}}
-  .sg-reset{margin-top:14px; font-size:12px; color:var(--muted); background:none; border:none; cursor:pointer; text-decoration:underline; padding:4px}
+  .sg-reset{
+    margin-top:14px; font-size:12px; color:var(--color-muted);
+    background:none; border:none; cursor:pointer;
+    text-decoration:underline; padding:4px;
+    font-family:var(--font-body);
+  }
 
   @media (prefers-reduced-motion:reduce){.sg-app *{transition:none !important; animation:none !important}}
 </style>
@@ -155,7 +382,7 @@
     <div class="sg-top">
       <div class="sg-brandrow">
         <div class="sg-brand">
-          <svg class="sg-ridge" viewBox="0 0 22 14" fill="none"><path d="M1 13L7 3l4 5 3-5 6 10z" stroke="#E8843C" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <svg class="sg-ridge" viewBox="0 0 22 14" fill="none"><path d="M1 13L7 3l4 5 3-5 6 10z" stroke="#7EC49A" stroke-width="1.8" stroke-linejoin="round"/></svg>
           Südgrat · Zeit
         </div>
         <span class="sg-badge">GLEITZEIT</span>
